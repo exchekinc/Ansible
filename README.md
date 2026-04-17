@@ -2,6 +2,11 @@
 
 > *"The ansible was a device that could communicate faster than light."*
 > — Ursula K. Le Guin, *Rocannon's World* (1966)
+>
+> The term was coined by Le Guin from Old French *anseis* (to answer), and later
+> popularized by Orson Scott Card across the *Ender* series beginning with
+> *Ender's Game* (1985), where it appears as the standard interstellar
+> instantaneous-communication technology of the Hegemony.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-ansible--quantum.vercel.app-00d4ff?style=flat-square&logo=vercel)](https://ansible-quantum.vercel.app)
 [![Whitepaper](https://img.shields.io/badge/Whitepaper-Read%20Now-7c3aed?style=flat-square&logo=bookstack)](https://ansible-quantum.vercel.app/paper)

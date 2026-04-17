@@ -13,7 +13,7 @@
           "id": "intro-history",
           "number": "1.1",
           "title": "Historical Context: From EPR to Entanglement Engineering",
-          "content": "The story of quantum non-locality begins in 1935 with the Einstein-Podolsky-Rosen paper, which argued that quantum mechanics was incomplete precisely because it appeared to require what Einstein termed 'spooky action at a distance' — the instantaneous correlation of measurement outcomes for spatially separated particles. Einstein's discomfort was not aesthetic; he believed these correlations implied either that quantum mechanics was incomplete (missing 'hidden variables' that locally determined measurement outcomes) or that it was non-local in a sense incompatible with special relativity.\n\nJohn Bell's 1964 theorem transformed this philosophical debate into an empirical one. Bell derived inequalities that any local hidden variable theory must satisfy, and showed that quantum mechanics predicts violations of these inequalities. Subsequent experiments — from Clauser and Freedman (1972) through Aspect, Grangier, and Roger (1982) to the loophole-free Bell tests of Hensen et al. (2015) and Giustina et al. (2015) — have confirmed quantum mechanical predictions with overwhelming confidence. The universe is, in Bell's precise sense, non-local: measurement outcomes for entangled particles are correlated in ways that cannot be explained by any local realistic theory.\n\nYet this established non-locality has, within standard quantum mechanics, been carefully shown not to permit superluminal signaling. The no-communication theorem demonstrates that the marginal statistics of measurements on one subsystem of an entangled pair are independent of any operations performed on the other subsystem. Alice cannot send a message to Bob by manipulating her entangled particles, because Bob's measurement statistics are identical regardless of what Alice does. The non-locality is real, but it is, in the standard framework, informationally sterile.\n\nThe question we pose is whether this informational sterility is a fundamental feature of quantum non-locality or a contingent feature of the specific Hamiltonian dynamics that govern standard quantum systems. If the latter, then a modification of those dynamics — one that preserves the successful predictions of standard QM in all tested regimes — might unlock the communication potential latent in entanglement. This is the central theoretical bet of the Ansible Hypothesis."
+          "content": "The story of quantum non-locality begins in 1935 with the Einstein-Podolsky-Rosen paper, which argued that quantum mechanics was incomplete precisely because it appeared to require what Einstein termed 'spooky action at a distance' — the instantaneous correlation of measurement outcomes for spatially separated particles. Einstein's discomfort was not aesthetic; he believed these correlations implied either that quantum mechanics was incomplete (missing 'hidden variables' that locally determined measurement outcomes) or that it was non-local in a sense incompatible with special relativity.\n\nJohn Bell's 1964 theorem transformed this philosophical debate into an empirical one. Bell derived inequalities that any local hidden variable theory must satisfy, and showed that quantum mechanics predicts violations of these inequalities. Subsequent experiments — from Clauser and Freedman (1972) through Aspect, Grangier, and Roger (1982) to the loophole-free Bell tests of Hensen et al. (2015) and Giustina et al. (2015) — have confirmed quantum mechanical predictions with overwhelming confidence. The universe is, in Bell's precise sense, non-local: measurement outcomes for entangled particles are correlated in ways that cannot be explained by any local realistic theory.\n\nYet this established non-locality has, within standard quantum mechanics, been carefully shown not to permit superluminal signaling. The no-communication theorem demonstrates that the marginal statistics of measurements on one subsystem of an entangled pair are independent of any operations performed on the other subsystem. Alice cannot send a message to Bob by manipulating her entangled particles, because Bob's measurement statistics are identical regardless of what Alice does. The non-locality is real, but it is, in the standard framework, informationally sterile.\n\nThe question we pose is whether this informational sterility is a fundamental feature of quantum non-locality or a contingent feature of the specific Hamiltonian dynamics that govern standard quantum systems. If the latter, then a modification of those dynamics — one that preserves the successful predictions of standard QM in all tested regimes — might unlock the communication potential latent in entanglement. This is the central theoretical bet of the Ansible Hypothesis.\n\n### A note on nomenclature\n\nThe term *Ansible* is borrowed from science fiction and carries two well-established literary attributions. Ursula K. Le Guin coined the word in *Rocannon's World* (1966) for a fictional device permitting instantaneous communication across interstellar distances; by her own account the name derives from Old French *anseis*, to answer, reflecting the device's role as a channel for genuine dialogue rather than delayed message-passing. Orson Scott Card adopted and popularized the term across the *Ender* series beginning with *Ender's Game* (1985), where the ansible functions as the standard faster-than-light communication technology of an interstellar civilization. We retain the name because it captures the essential property the present framework seeks to realize — not the transmission of energy across a spacelike interval, which relativity forbids, but the establishment of a live correlational channel between remote observers. The word is a tribute to the literary tradition and to the physical aspiration it names; it should not be read as a claim that the device described in these novels is the one being engineered here."
         },
         {
           "id": "intro-scope",
@@ -561,22 +561,26 @@
     },
     {
       "number": 21,
-      "citation": "Le Guin, U. K. (1966). Rocannon's World. Ace Books, New York. [First literary appearance of the Ansible concept]"
+      "citation": "Le Guin, U. K. (1966). Rocannon's World. Ace Books, New York. [First literary appearance of the Ansible concept; Le Guin coined the term from Old French anseis (to answer).]"
     },
     {
       "number": 22,
-      "citation": "Maggiore, M., & Mancarella, M. (2014). Nonlocal gravity and dark energy. Physical Review D, 90(2), 023005."
+      "citation": "Card, O. S. (1985). Ender's Game. Tor Books, New York. [Popularized the Ansible as instantaneous interstellar communication device across the Ender series.]"
     },
     {
       "number": 23,
-      "citation": "Wilde, M. M. (2017). Quantum Information Theory, 2nd edition. Cambridge University Press, Cambridge."
+      "citation": "Maggiore, M., & Mancarella, M. (2014). Nonlocal gravity and dark energy. Physical Review D, 90(2), 023005."
     },
     {
       "number": 24,
-      "citation": "Walls, D. F., & Milburn, G. J. (2008). Quantum Optics, 2nd edition. Springer-Verlag, Berlin."
+      "citation": "Wilde, M. M. (2017). Quantum Information Theory, 2nd edition. Cambridge University Press, Cambridge."
     },
     {
       "number": 25,
+      "citation": "Walls, D. F., & Milburn, G. J. (2008). Quantum Optics, 2nd edition. Springer-Verlag, Berlin."
+    },
+    {
+      "number": 26,
       "citation": "Susskind, L. (2016). Copenhagen vs Everett, teleportation, and ER=EPR. Fortschritte der Physik, 64(6–7), 551–564."
     }
   ]
