@@ -151,3 +151,62 @@ body {
 .slider-cyan::-webkit-slider-thumb { background: var(--cyan); }
 .slider-cyan::-webkit-slider-runnable-track { background: rgba(0,212,255,0.2); }
 input[type="range"] { accent-color: #00d4ff; }
+
+/* Cinematic typography utilities */
+.cinematic-title {
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  line-height: 0.95;
+}
+.caption {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.7rem;
+  color: #8b92a9;
+}
+.mono-tick {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: #5a6070;
+  text-transform: uppercase;
+}
+
+/* Corner ticks (L-shaped markers) */
+.corner-tick-tl, .corner-tick-tr, .corner-tick-bl, .corner-tick-br {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  opacity: 0.55;
+}
+.corner-tick-tl { top: 16px; left: 16px; border-top: 1px solid rgba(0,212,255,0.6); border-left: 1px solid rgba(0,212,255,0.6); }
+.corner-tick-tr { top: 16px; right: 16px; border-top: 1px solid rgba(0,212,255,0.6); border-right: 1px solid rgba(0,212,255,0.6); }
+.corner-tick-bl { bottom: 16px; left: 16px; border-bottom: 1px solid rgba(0,212,255,0.6); border-left: 1px solid rgba(0,212,255,0.6); }
+.corner-tick-br { bottom: 16px; right: 16px; border-bottom: 1px solid rgba(0,212,255,0.6); border-right: 1px solid rgba(0,212,255,0.6); }
+
+@keyframes beam-pulse {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.beam-pulse {
+  background: linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.1) 40%, rgba(0,212,255,0.8) 50%, rgba(0,212,255,0.1) 60%, transparent 100%);
+  background-size: 200% 100%;
+  animation: beam-pulse 2.2s linear infinite;
+}
+
+@keyframes scroll-pulse {
+  0%, 100% { transform: scaleY(0.3); opacity: 0.3; transform-origin: top; }
+  50% { transform: scaleY(1); opacity: 1; transform-origin: top; }
+}
+.scroll-pulse { animation: scroll-pulse 2.4s ease-in-out infinite; }
+
+/* Subtle glow for cinematic numbers */
+.numeric-ghost {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(0,212,255,0.15);
+  letter-spacing: -0.04em;
+}

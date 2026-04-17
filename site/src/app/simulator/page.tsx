@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function SimulatorPage() {
   return (
     <div className="pt-28 pb-24 min-h-screen grid-bg">
-      <div className="max-w-3xl mx-auto px-6">
+      <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
           <div

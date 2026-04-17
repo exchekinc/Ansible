@@ -1,6 +1,7 @@
 import { BookOpen, Users, Calendar, Tag } from 'lucide-react';
 import paperData from '@/lib/paperData.json';
 import PaperContent from '@/components/paper/PaperContent';
+import PaperFadeIn from '@/components/paper/PaperFadeIn';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ const { title, subtitle, abstract, sections, references } = paperData as {
 
 export default function PaperPage() {
   return (
+    <PaperFadeIn>
     <div className="pt-20 pb-24">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex gap-10 relative">
@@ -166,5 +168,6 @@ export default function PaperPage() {
         </div>
       </div>
     </div>
+    </PaperFadeIn>
   );
 }

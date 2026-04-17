@@ -1,21 +1,32 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, RotateCcw, Zap, Clock, Radio, ChevronDown, ChevronUp, Activity } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Radio, Zap, Clock } from 'lucide-react';
+import MissionScene from './MissionScene';
+import ControlConsole from './ControlConsole';
 
-const MARS_DISTANCES = {
-  min: { km: 54_600_000, label: 'Closest Approach', sub: '54.6M km' },
-  avg: { km: 225_000_000, label: 'Average Distance', sub: '225M km' },
-  max: { km: 401_000_000, label: 'Maximum Distance', sub: '401M km' },
-};
+// -----------------------------
+// Shared constants (exported for console)
+// -----------------------------
+export const MARS_DISTANCES = {
+  min: { km: 54_600_000, label: 'Closest Approach', sub: '54.6M km · 3.03 lmin' },
+  avg: { km: 225_000_000, label: 'Average Distance', sub: '225M km · 12.5 lmin' },
+  max: { km: 401_000_000, label: 'Maximum Distance', sub: '401M km · 22.3 lmin' },
+} as const;
 
 const C = 299_792.458; // km/s
 
-type DistanceKey = keyof typeof MARS_DISTANCES;
+export type DistanceKey = keyof typeof MARS_DISTANCES;
 
-interface BitResult { bit: number; original: number; error: boolean; }
+interface BitResult {
+  bit: number;
+  original: number;
+  error: boolean;
+}
 
 export default function QuantumSimulator() {
+  // ---- State (all preserved from the original) ----
   const [lambda, setLambda] = useState(1.0);
   const [kappa, setKappa] = useState(0.15);
   const [theta, setTheta] = useState(Math.PI / 8);
@@ -25,17 +36,28 @@ export default function QuantumSimulator() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [errorCorrection, setErrorCorrection] = useState(true);
   const [message, setMessage] = useState('Hello, Mars. This is Earth. Do you copy?');
-  const [binaryBits, setBinaryBits] = useState<number[]>([]);
   const [resultBits, setResultBits] = useState<BitResult[]>([]);
   const [transmitting, setTransmitting] = useState(false);
   const [complete, setComplete] = useState(false);
   const [transmitTime, setTransmitTime] = useState(0);
   const [currentBit, setCurrentBit] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
+  const [errorFlash, setErrorFlash] = useState(0);
+
+  // Live HUD metrics for scene
+  const [radioFill, setRadioFill] = useState(0);
+  const [ansibleFill, setAnsibleFill] = useState(0);
+
   const rafRef = useRef<number>(0);
+  const radioRafRef = useRef<number>(0);
   const mountedRef = useRef(true);
 
-  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const dist = MARS_DISTANCES[distKey];
   const lightspeedTime = dist.km / C;
@@ -49,20 +71,23 @@ export default function QuantumSimulator() {
     return bits;
   };
 
-  useEffect(() => { setBinaryBits(toBinary(message)); }, [message]);
+  const binaryBits = toBinary(message);
 
   const reset = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
+    cancelAnimationFrame(radioRafRef.current);
     setTransmitting(false);
     setComplete(false);
     setResultBits([]);
     setCurrentBit(null);
     setProgress(0);
     setTransmitTime(0);
+    setRadioFill(0);
+    setAnsibleFill(0);
   }, []);
 
   const channelCapacity = (() => {
-    const h = (p: number) => p <= 0 || p >= 1 ? 0 : -p * Math.log2(p) - (1 - p) * Math.log2(1 - p);
+    const h = (p: number) => (p <= 0 || p >= 1 ? 0 : -p * Math.log2(p) - (1 - p) * Math.log2(1 - p));
     const theoretical = 1 - h(errorRate);
     const efficiency = 0.5 + 0.5 * Math.exp(-(Math.pow(lambda - 1.0, 2) + Math.pow(kappa - 0.15, 2)) / 0.5);
     const practical = theoretical * efficiency;
@@ -80,9 +105,23 @@ export default function QuantumSimulator() {
     let lastTimestamp = 0;
     const startTime = performance.now();
 
+    // Start the radio-comparison fill (scales linearly across lightspeedTime)
+    const radioDurMs = Math.min(lightspeedTime * 1000, 6000); // cap visually at 6s
+    const radioStart = performance.now();
+    const radioTick = (now: number) => {
+      if (!mountedRef.current) return;
+      const r = Math.min(1, (now - radioStart) / radioDurMs);
+      setRadioFill(r);
+      if (r < 1) radioRafRef.current = requestAnimationFrame(radioTick);
+    };
+    radioRafRef.current = requestAnimationFrame(radioTick);
+
     const step = (timestamp: number) => {
       if (!mountedRef.current) return;
-      if (timestamp - lastTimestamp < 60) { rafRef.current = requestAnimationFrame(step); return; }
+      if (timestamp - lastTimestamp < 60) {
+        rafRef.current = requestAnimationFrame(step);
+        return;
+      }
       lastTimestamp = timestamp;
 
       if (idx < bits.length) {
@@ -93,7 +132,10 @@ export default function QuantumSimulator() {
         idx++;
         setCurrentBit(original);
         setResultBits([...results]);
-        setProgress(idx / bits.length);
+        const prog = idx / bits.length;
+        setProgress(prog);
+        setAnsibleFill(prog);
+        if (flipped) setErrorFlash((x) => x + 1);
         rafRef.current = requestAnimationFrame(step);
       } else {
         const elapsed = (performance.now() - startTime) / 1000;
@@ -102,6 +144,7 @@ export default function QuantumSimulator() {
         setComplete(true);
         setCurrentBit(null);
         setProgress(1);
+        setAnsibleFill(1);
       }
     };
     rafRef.current = requestAnimationFrame(step);
@@ -109,11 +152,15 @@ export default function QuantumSimulator() {
 
   const decoded = (() => {
     if (!complete || resultBits.length === 0) return { text: '', errors: 0, corrected: 0 };
-    let errors = 0, corrected = 0;
+    let errors = 0,
+      corrected = 0;
     const bits = resultBits.map(({ bit, original, error }) => {
       if (error) {
         errors++;
-        if (errorCorrection) { corrected++; return original; }
+        if (errorCorrection) {
+          corrected++;
+          return original;
+        }
       }
       return bit;
     });
@@ -133,295 +180,282 @@ export default function QuantumSimulator() {
     return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m`;
   };
 
+  // Fidelity readout — derived from lambda/kappa window + errorRate
+  const fidelity = Math.max(
+    0.85,
+    Math.min(
+      0.9999,
+      0.9997 *
+        (0.5 +
+          0.5 * Math.exp(-(Math.pow(lambda - 1.0, 2) + Math.pow(kappa - 0.15, 2)) / 0.5)) -
+        errorRate * 0.1,
+    ),
+  );
+  const pairRate = Math.round(1_000_000 * (0.8 + 0.4 * Math.exp(-Math.pow(lambda - 1, 2))));
+  const distanceLabel = `${dist.sub}`.toUpperCase();
+
   return (
-    <div className="space-y-5 max-w-3xl mx-auto">
-      {/* Distance selector */}
-      <div className="glass rounded-2xl p-6">
-        <label className="block text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#00d4ff' }}>
-          Earth–Mars Distance
-        </label>
-        <div className="grid grid-cols-3 gap-3">
-          {(Object.entries(MARS_DISTANCES) as [DistanceKey, typeof MARS_DISTANCES.min][]).map(([key, val]) => (
-            <button
-              key={key}
-              onClick={() => setDistKey(key)}
-              className="p-3 rounded-xl text-left transition-all duration-200"
-              style={{
-                background: distKey === key ? 'rgba(0,212,255,0.1)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${distKey === key ? 'rgba(0,212,255,0.4)' : 'rgba(255,255,255,0.06)'}`,
-              }}
-            >
-              <div className="text-xs font-semibold mb-0.5" style={{ color: distKey === key ? '#00d4ff' : '#8b92a9' }}>
-                {val.label}
-              </div>
-              <div className="text-[10px]" style={{ color: '#5a6070' }}>{val.sub}</div>
-            </button>
-          ))}
-        </div>
-        <p className="text-xs mt-3" style={{ color: '#5a6070' }}>
-          Classical radio delay at this distance: <span style={{ color: '#ef4444' }}>{formatTime(lightspeedTime)}</span>
-        </p>
+    <div className="space-y-5">
+      {/* ---- Top transmission timeline strip ---- */}
+      <div
+        className="relative h-[3px] rounded-full overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.05)' }}
+      >
+        <motion.div
+          className="absolute inset-y-0 left-0"
+          style={{
+            width: `${progress * 100}%`,
+            background: 'linear-gradient(to right, #00d4ff, #7c3aed)',
+            boxShadow: transmitting ? '0 0 8px rgba(0,212,255,0.6)' : 'none',
+          }}
+          animate={{ width: `${progress * 100}%` }}
+          transition={{ duration: 0.15 }}
+        />
+        {transmitting && (
+          <div
+            className="absolute inset-y-0"
+            style={{
+              left: `${Math.max(0, progress * 100 - 2)}%`,
+              width: 3,
+              background: '#ffffff',
+              boxShadow: '0 0 8px #00d4ff, 0 0 16px #00d4ff',
+            }}
+          />
+        )}
       </div>
 
-      {/* Parameters */}
-      <div className="glass rounded-2xl p-6">
-        <label className="block text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#00d4ff' }}>
-          Quantum Parameters
-        </label>
-        <div className="grid grid-cols-2 gap-5">
-          <div>
-            <div className="flex justify-between text-xs mb-2">
-              <span style={{ color: '#8b92a9' }}>λ Lambda Coupling</span>
-              <span style={{ color: '#00d4ff' }}>{lambda.toFixed(2)}</span>
-            </div>
-            <input type="range" min={0} max={2} step={0.05} value={lambda} onChange={e => setLambda(+e.target.value)} className="w-full" />
-          </div>
-          <div>
-            <div className="flex justify-between text-xs mb-2">
-              <span style={{ color: '#8b92a9' }}>κ Kappa Coupling</span>
-              <span style={{ color: '#7c3aed' }}>{kappa.toFixed(2)}</span>
-            </div>
-            <input type="range" min={0} max={0.5} step={0.01} value={kappa} onChange={e => setKappa(+e.target.value)} className="w-full" />
-          </div>
+      {/* ---- Mission viewport ---- */}
+      <div
+        className="relative rounded-2xl overflow-hidden glass"
+        style={{
+          aspectRatio: '16 / 9',
+          minHeight: 320,
+          border: '1px solid rgba(0,212,255,0.15)',
+        }}
+      >
+        <MissionScene
+          transmitting={transmitting}
+          progress={progress}
+          errorFlash={errorFlash}
+          distanceLabel={distanceLabel}
+          fidelity={fidelity}
+          pairRate={pairRate}
+          bitsSent={resultBits.length}
+        />
+      </div>
+
+      {/* ---- Control console ---- */}
+      <ControlConsole
+        distKey={distKey}
+        setDistKey={setDistKey}
+        lambda={lambda}
+        setLambda={setLambda}
+        kappa={kappa}
+        setKappa={setKappa}
+        theta={theta}
+        setTheta={setTheta}
+        phi={phi}
+        setPhi={setPhi}
+        errorRate={errorRate}
+        setErrorRate={setErrorRate}
+        errorCorrection={errorCorrection}
+        setErrorCorrection={setErrorCorrection}
+        showAdvanced={showAdvanced}
+        setShowAdvanced={setShowAdvanced}
+        message={message}
+        setMessage={(s) => { setMessage(s); reset(); }}
+        onTransmit={startTransmission}
+        onReset={reset}
+        transmitting={transmitting}
+        binaryBits={binaryBits}
+        channelCapacity={channelCapacity.practical}
+        formatTime={formatTime}
+        lightspeedTime={lightspeedTime}
+      />
+
+      {/* ---- Latency comparison panel ---- */}
+      <div className="glass rounded-2xl p-6 relative">
+        <div className="corner-tick-tl" />
+        <div className="corner-tick-br" />
+        <div className="caption mb-4" style={{ color: '#00d4ff' }}>
+          LATENCY COMPARISON
         </div>
 
-        <button
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center gap-1.5 text-xs mt-4 transition-colors hover:text-[#00d4ff]"
-          style={{ color: '#5a6070' }}
-        >
-          {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          {showAdvanced ? 'Hide' : 'Show'} Advanced Parameters
-        </button>
-
-        {showAdvanced && (
-          <div className="grid grid-cols-2 gap-5 mt-4 pt-4" style={{ borderTop: '1px solid rgba(0,212,255,0.07)' }}>
-            <div>
-              <div className="flex justify-between text-xs mb-2">
-                <span style={{ color: '#8b92a9' }}>θ Theta</span>
-                <span style={{ color: '#10b981' }}>{(theta / Math.PI).toFixed(2)}π</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Ansible */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Zap size={14} style={{ color: '#00d4ff' }} />
+                <span
+                  style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '11px', letterSpacing: '0.2em', color: '#00d4ff' }}
+                >
+                  ANSIBLE
+                </span>
               </div>
-              <input type="range" min={0} max={Math.PI} step={0.01} value={theta} onChange={e => setTheta(+e.target.value)} className="w-full" />
-            </div>
-            <div>
-              <div className="flex justify-between text-xs mb-2">
-                <span style={{ color: '#8b92a9' }}>φ Phi</span>
-                <span style={{ color: '#10b981' }}>{(phi / Math.PI).toFixed(2)}π</span>
-              </div>
-              <input type="range" min={0} max={Math.PI} step={0.01} value={phi} onChange={e => setPhi(+e.target.value)} className="w-full" />
-            </div>
-            <div>
-              <div className="flex justify-between text-xs mb-2">
-                <span style={{ color: '#8b92a9' }}>Error Rate</span>
-                <span style={{ color: '#f59e0b' }}>{(errorRate * 100).toFixed(1)}%</span>
-              </div>
-              <input type="range" min={0} max={0.1} step={0.001} value={errorRate} onChange={e => setErrorRate(+e.target.value)} className="w-full" />
-            </div>
-            <div className="flex items-center gap-3 pt-2">
               <div
-                onClick={() => setErrorCorrection(!errorCorrection)}
-                className="w-10 h-5 rounded-full cursor-pointer transition-all duration-200 relative flex-shrink-0"
                 style={{
-                  background: errorCorrection ? 'rgba(0,212,255,0.3)' : 'rgba(255,255,255,0.1)',
-                  border: `1px solid ${errorCorrection ? 'rgba(0,212,255,0.5)' : 'rgba(255,255,255,0.15)'}`,
+                  fontFamily: 'var(--font-mono), monospace',
+                  fontVariantNumeric: 'tabular-nums',
+                  color: '#00d4ff',
+                  fontWeight: 700,
                 }}
               >
-                <div
-                  className="absolute top-0.5 w-4 h-4 rounded-full transition-all duration-200"
-                  style={{
-                    left: errorCorrection ? '20px' : '1px',
-                    background: errorCorrection ? '#00d4ff' : '#5a6070',
-                  }}
-                />
+                {complete ? formatTime(transmitTime) : transmitting ? `${(transmitTime).toFixed(1)}s…` : '— —'}
               </div>
-              <span className="text-xs" style={{ color: '#8b92a9' }}>Error Correction</span>
             </div>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: '1px solid rgba(0,212,255,0.07)' }}>
-          <span className="text-xs" style={{ color: '#5a6070' }}>Channel Capacity</span>
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 w-24 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <div className="h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <div
                 className="h-1.5 rounded-full transition-all"
-                style={{ width: `${channelCapacity.practical * 100}%`, background: 'linear-gradient(to right, #00d4ff, #7c3aed)' }}
-              />
-            </div>
-            <span className="text-xs font-mono" style={{ color: '#00d4ff' }}>
-              {(channelCapacity.practical * 100).toFixed(1)}%
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Message input */}
-      <div className="glass rounded-2xl p-6">
-        <label className="block text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#00d4ff' }}>
-          Message to Transmit
-        </label>
-        <textarea
-          value={message}
-          onChange={e => { setMessage(e.target.value); reset(); }}
-          placeholder="Enter message to transmit to Mars..."
-          disabled={transmitting}
-          rows={3}
-          className="w-full rounded-xl px-4 py-3 text-sm resize-none focus:outline-none transition-all"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(0,212,255,0.15)',
-            color: '#e8eaf0',
-            caretColor: '#00d4ff',
-          }}
-          onFocus={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.4)'; }}
-          onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,212,255,0.15)'; }}
-        />
-        <div className="flex justify-between items-center mt-3">
-          <span className="text-xs" style={{ color: '#5a6070' }}>
-            {binaryBits.length} bits · {message.length} chars
-          </span>
-          <div className="flex gap-3">
-            <button
-              onClick={reset}
-              disabled={transmitting}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: '#8b92a9',
-              }}
-            >
-              <RotateCcw size={12} /> Reset
-            </button>
-            <button
-              onClick={startTransmission}
-              disabled={binaryBits.length === 0 || transmitting}
-              className="btn-primary flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold"
-            >
-              <Send size={12} />
-              {transmitting ? 'Transmitting...' : 'Transmit to Mars'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Transmission visualization */}
-      {(transmitting || complete) && (
-        <div className="glass rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Activity size={16} style={{ color: '#00d4ff' }} />
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#00d4ff' }}>
-              Quantum Transmission
-            </span>
-          </div>
-
-          {/* Progress bar */}
-          <div className="mb-5">
-            <div className="flex justify-between text-xs mb-2">
-              <span style={{ color: '#8b92a9' }}>
-                {transmitting ? `Transmitting bit ${resultBits.length} of ${binaryBits.length}` : 'Transmission complete'}
-              </span>
-              <span style={{ color: '#00d4ff' }}>{Math.round(progress * 100)}%</span>
-            </div>
-            <div className="h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
-              <div
-                className="h-2 rounded-full transition-all"
                 style={{
-                  width: `${progress * 100}%`,
+                  width: `${ansibleFill * 100}%`,
                   background: 'linear-gradient(to right, #00d4ff, #7c3aed)',
-                  boxShadow: transmitting ? '0 0 10px rgba(0,212,255,0.4)' : 'none',
+                  boxShadow: '0 0 10px rgba(0,212,255,0.3)',
                 }}
               />
             </div>
           </div>
 
-          {/* Live bit stream */}
-          {transmitting && currentBit !== null && (
-            <div className="mb-5 p-3 rounded-xl font-mono text-xs flex items-center gap-3"
-              style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.1)' }}>
-              <span className="animate-pulse-slow w-2 h-2 rounded-full bg-[#00d4ff]" />
-              <span style={{ color: '#00d4ff' }}>TRANSMITTING</span>
-              <span style={{ color: '#8b92a9' }}>current bit:</span>
-              <span className="text-sm font-bold" style={{ color: '#e8eaf0' }}>{currentBit}</span>
-            </div>
-          )}
-
-          {/* Results */}
-          {complete && (
-            <>
-              <div className="grid grid-cols-2 gap-4 mb-5">
-                <div
-                  className="rounded-xl p-4"
-                  style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.15)' }}
+          {/* Radio */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Radio size={14} style={{ color: '#ef4444' }} />
+                <span
+                  style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '11px', letterSpacing: '0.2em', color: '#ef4444' }}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Zap size={14} style={{ color: '#00d4ff' }} />
-                    <span className="text-xs" style={{ color: '#8b92a9' }}>Ansible Time</span>
-                  </div>
-                  <div className="text-xl font-bold font-mono" style={{ color: '#00d4ff' }}>
-                    {formatTime(transmitTime)}
-                  </div>
-                </div>
-                <div
-                  className="rounded-xl p-4"
-                  style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Radio size={14} style={{ color: '#ef4444' }} />
-                    <span className="text-xs" style={{ color: '#8b92a9' }}>Radio Time</span>
-                  </div>
-                  <div className="text-xl font-bold font-mono" style={{ color: '#ef4444' }}>
-                    {formatTime(lightspeedTime)}
-                  </div>
-                </div>
+                  RADIO · c
+                </span>
               </div>
-
               <div
-                className="text-center py-3 rounded-xl mb-5"
                 style={{
-                  background: speedup > 1 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
-                  border: `1px solid ${speedup > 1 ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                  fontFamily: 'var(--font-mono), monospace',
+                  fontVariantNumeric: 'tabular-nums',
+                  color: '#ef4444',
+                  fontWeight: 700,
                 }}
               >
-                {speedup > 1 ? (
-                  <span className="font-bold text-sm" style={{ color: '#10b981' }}>
-                    ⚡ {speedup.toLocaleString()}× faster than light-speed radio
-                  </span>
-                ) : (
-                  <span className="text-sm" style={{ color: '#ef4444' }}>Transmission speed not superluminal</span>
-                )}
+                {formatTime(lightspeedTime)}
               </div>
-
-              {/* Decoded message */}
-              <div>
-                <p className="text-xs font-semibold mb-2 flex items-center gap-2" style={{ color: '#8b92a9' }}>
-                  <Clock size={12} style={{ color: '#00d4ff' }} />
-                  Message Received on Mars
-                </p>
-                <div
-                  className="rounded-xl px-4 py-3 font-mono text-sm min-h-10"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#e8eaf0' }}
-                >
-                  {decoded.text || <span style={{ color: '#5a6070' }}>—</span>}
-                </div>
-                {decoded.errors > 0 && (
-                  <p className="text-xs mt-2" style={{ color: '#f59e0b' }}>
-                    {errorCorrection
-                      ? `Detected & corrected ${decoded.corrected} bit errors via surface code`
-                      : `${decoded.errors} bit errors detected (error correction disabled)`}
-                  </p>
-                )}
-                {decoded.errors === 0 && (
-                  <p className="text-xs mt-2" style={{ color: '#10b981' }}>No transmission errors detected</p>
-                )}
-              </div>
-            </>
-          )}
+            </div>
+            <div className="h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div
+                className="h-1.5 rounded-full transition-all"
+                style={{ width: `${radioFill * 100}%`, background: 'linear-gradient(to right, #ef4444, #f59e0b)' }}
+              />
+            </div>
+          </div>
         </div>
-      )}
 
-      <p className="text-xs text-center" style={{ color: '#5a6070' }}>
-        Simulation based on the Ansible theoretical framework. Real implementation would require orbital quantum relay infrastructure.
+        <AnimatePresence>
+          {complete && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mt-5 text-center py-2.5 rounded-xl"
+              style={{
+                background: speedup > 1 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+                border: `1px solid ${speedup > 1 ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`,
+              }}
+            >
+              {speedup > 1 ? (
+                <span
+                  style={{
+                    color: '#10b981',
+                    fontFamily: 'var(--font-mono), monospace',
+                    letterSpacing: '0.15em',
+                    fontWeight: 700,
+                    fontSize: '12px',
+                  }}
+                >
+                  ⚡ {speedup.toLocaleString()}× FASTER THAN LIGHT-SPEED RADIO
+                </span>
+              ) : (
+                <span style={{ color: '#ef4444', fontSize: '12px' }}>Transmission speed not superluminal</span>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ---- Transmission result / decoded message ---- */}
+      <AnimatePresence>
+        {(transmitting || complete) && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="glass rounded-2xl p-6 relative"
+          >
+            <div className="corner-tick-tr" />
+            <div className="corner-tick-bl" />
+
+            <div className="flex items-center justify-between mb-4">
+              <div className="caption" style={{ color: '#00d4ff' }}>
+                {transmitting ? 'LIVE STREAM' : 'RECEIVED ON MARS'}
+              </div>
+              {transmitting && currentBit !== null && (
+                <div
+                  className="flex items-center gap-2"
+                  style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '11px', letterSpacing: '0.15em' }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse-slow" style={{ background: '#00d4ff' }} />
+                  <span style={{ color: '#00d4ff' }}>BIT</span>
+                  <span style={{ color: '#e8eaf0', fontWeight: 700 }}>{currentBit}</span>
+                </div>
+              )}
+            </div>
+
+            <div
+              className="rounded-xl px-4 py-3 min-h-10"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                color: '#e8eaf0',
+                fontFamily: 'var(--font-mono), monospace',
+                fontSize: 13,
+                letterSpacing: '0.01em',
+                minHeight: 54,
+              }}
+            >
+              {complete
+                ? decoded.text || <span style={{ color: '#5a6070' }}>—</span>
+                : (
+                  <span style={{ color: '#8b92a9' }}>
+                    Transmitting bit {resultBits.length} of {binaryBits.length}…
+                  </span>
+                )}
+            </div>
+
+            {complete && decoded.errors > 0 && (
+              <p
+                className="mt-3 flex items-center gap-2"
+                style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '11px', letterSpacing: '0.12em', color: '#f59e0b' }}
+              >
+                <Clock size={11} />
+                {errorCorrection
+                  ? `CORRECTED ${decoded.corrected} BIT ERRORS VIA SURFACE CODE`
+                  : `${decoded.errors} UNCORRECTED BIT ERRORS`}
+              </p>
+            )}
+            {complete && decoded.errors === 0 && (
+              <p
+                className="mt-3"
+                style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '11px', letterSpacing: '0.12em', color: '#10b981' }}
+              >
+                ● ZERO-ERROR TRANSMISSION
+              </p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <p
+        className="text-center"
+        style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '10px', letterSpacing: '0.2em', color: '#5a6070' }}
+      >
+        SIMULATION · ANSIBLE FRAMEWORK · THEORETICAL
       </p>
     </div>
   );
