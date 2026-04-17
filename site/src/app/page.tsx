@@ -15,8 +15,10 @@ import {
   ArrowRight,
   Satellite,
   Zap,
-  Shield,
-  Globe,
+  ShieldCheck,
+  Network,
+  BarChart3,
+  Compass,
   BookOpen,
   FlaskConical,
   Radio,
@@ -35,32 +37,52 @@ const { stats, keyInsights, abstract } = typedPaper;
 
 const features = [
   {
-    icon: Satellite,
-    color: '#00d4ff',
-    title: 'Orbital Relay Architecture',
-    description:
-      'Six geostationary satellites maintain entangled photon pairs in the ultra-low decoherence environment of space, 35,786 km above Earth.',
-  },
-  {
     icon: Zap,
     color: '#7c3aed',
-    title: 'Modified Non-Local Hamiltonian',
+    title: 'Non-Local Hamiltonian (\u03bb_NL)',
     description:
-      'A novel quantum interaction term couples spatially separated entangled subsystems, enabling controlled correlational information flow.',
+      'A minimal interaction term coupling spatially separated entangled subsystems. A Lorentz-covariant form is developed in \u00a72.5, and \u00a72.6 shows higher-order unitarity is preserved order-by-order.',
+    ref: '\u00a72 \u00b7 2.5 \u00b7 2.6',
   },
   {
-    icon: Shield,
+    icon: ShieldCheck,
     color: '#10b981',
-    title: 'Surface Code Error Correction',
+    title: 'No-Signaling, Reconciled',
     description:
-      'Distance-7 surface codes combined with Reed-Solomon classical FEC achieve 99.95% reliability despite the harsh space radiation environment.',
+      'The no-signaling theorem assumes [H_int, O_B] = 0. \u00a711.5 shows that premise fails once H_NL is added, so Ansible evades the theorem on its own terms \u2014 it does not violate it.',
+    ref: '\u00a711.5',
   },
   {
-    icon: Globe,
-    color: '#f59e0b',
-    title: 'Two-Tier Causality Model',
+    icon: Network,
+    color: '#00d4ff',
+    title: 'ER=EPR Grounding',
     description:
-      'Energetic information remains light-speed bound while correlational information propagates via non-local quantum channels — resolving the causality paradox.',
+      'The fidelity threshold F_* is the macroscopic image of a Gao\u2013Jafferis\u2013Wall traversable ER bridge. Below F_*, silence; above it, correlated evolution \u2014 grounded in AdS/CFT via van Raamsdonk.',
+    ref: '\u00a74 \u00b7 11.6',
+  },
+  {
+    icon: BarChart3,
+    color: '#f59e0b',
+    title: 'Bekenstein-Compatible Capacity',
+    description:
+      'A tightened derivation from pair flux \u00d7 photon energy yields an ~10\u00b9\u00b3 bit/s ceiling for the proposed channel \u2014 orders of magnitude below the relevant horizon bound.',
+    ref: '\u00a75.5',
+  },
+  {
+    icon: Satellite,
+    color: '#00d4ff',
+    title: 'Orbital Relay Infrastructure',
+    description:
+      'The architecture is aligned with near-term quantum missions \u2014 CAPSat, SEAQUE, SpooQy, Micius \u2014 so every component either exists or is on a funded roadmap.',
+    ref: '\u00a76.4',
+  },
+  {
+    icon: Compass,
+    color: '#a78bfa',
+    title: 'Research Program, Not a Claim',
+    description:
+      'Ansible is framed as a Lakatosian research program with three pillars. The likely outcome is tighter null bounds on \u03bb_NL \u2014 which is still scientifically valuable.',
+    ref: '\u00a712.2',
   },
 ];
 
@@ -274,7 +296,7 @@ export default function Home() {
           className="absolute top-6 right-24 z-10 hidden md:block"
           style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '10px', letterSpacing: '0.25em', color: '#5a6070' }}
         >
-          v1.1 · PAGE 01
+          v1.2 · PAGE 01
         </div>
         <div
           className="absolute bottom-6 left-24 z-10 hidden md:block"
@@ -300,7 +322,7 @@ export default function Home() {
           }}
         >
           <span className="w-1.5 h-1.5 rounded-full animate-pulse-slow" style={{ background: '#00d4ff' }} />
-          THEORETICAL FRAMEWORK · OPEN ACCESS · v1.0
+          THEORETICAL FRAMEWORK · OPEN ACCESS · v1.2
         </motion.div>
 
         {/* Hero content (title block) */}
@@ -570,14 +592,14 @@ export default function Home() {
               className="cinematic-title"
               style={{ fontSize: 'clamp(2.25rem, 5vw, 4rem)', color: '#e8eaf0' }}
             >
-              Four pillars,
+              Six pillars,
               <br />
               <span style={{ color: '#8b92a9', fontWeight: 200 }}>one theoretical frame.</span>
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {features.map(({ icon: Icon, color, title, description }, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map(({ icon: Icon, color, title, description, ref }, i) => (
               <motion.div
                 key={title}
                 initial={{ opacity: 0, y: 40 }}
@@ -612,20 +634,33 @@ export default function Home() {
                       letterSpacing: '0.25em',
                     }}
                   >
-                    {String(i + 1).padStart(2, '0')} / 04
+                    {String(i + 1).padStart(2, '0')} / 06
                   </div>
                 </div>
 
                 <div className="relative z-10">
                   <h3
                     className="font-semibold mb-3"
-                    style={{ color: '#e8eaf0', fontSize: '1.15rem', letterSpacing: '-0.015em' }}
+                    style={{ color: '#e8eaf0', fontSize: '1.1rem', letterSpacing: '-0.015em' }}
                   >
                     {title}
                   </h3>
-                  <p className="text-sm leading-relaxed" style={{ color: '#8b92a9' }}>
+                  <p className="text-sm leading-relaxed mb-4" style={{ color: '#8b92a9' }}>
                     {description}
                   </p>
+                  <div
+                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md"
+                    style={{
+                      background: `${color}12`,
+                      border: `1px solid ${color}28`,
+                      fontFamily: 'var(--font-mono), monospace',
+                      fontSize: '10px',
+                      letterSpacing: '0.1em',
+                      color: color,
+                    }}
+                  >
+                    {ref}
+                  </div>
                 </div>
 
                 {/* Hover glow border */}

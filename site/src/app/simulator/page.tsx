@@ -1,6 +1,6 @@
 import QuantumSimulator from '@/components/simulator/QuantumSimulator';
 import type { Metadata } from 'next';
-import { FlaskConical, Satellite } from 'lucide-react';
+import { FlaskConical, Satellite, Target, GitBranch } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Mars Quantum Simulator — Ansible',
@@ -40,7 +40,7 @@ export default function SimulatorPage() {
         </div>
 
         {/* Info cards */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div
             className="glass rounded-xl p-4 flex items-start gap-3"
           >
@@ -62,6 +62,70 @@ export default function SimulatorPage() {
                 Modified non-local Hamiltonian enables controlled FTL correlational information transfer
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Mechanism + Interpretation panels */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div
+            className="rounded-xl p-5"
+            style={{
+              background: 'rgba(16,185,129,0.05)',
+              border: '1px solid rgba(16,185,129,0.2)',
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Target size={14} style={{ color: '#10b981' }} />
+              <div
+                className="text-[10px] font-semibold"
+                style={{ color: '#10b981', letterSpacing: '0.2em' }}
+              >
+                THE F_* THRESHOLD
+              </div>
+            </div>
+            <div className="text-sm font-semibold mb-2" style={{ color: '#e8eaf0' }}>
+              A hard activation boundary, not a dial.
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: '#8b92a9' }}>
+              The proposed mechanism activates only when pair fidelity exceeds{' '}
+              <span style={{ color: '#10b981', fontFamily: 'var(--font-mono), monospace' }}>F_*</span>
+              {' '}&mdash; an ER-bridge traversability threshold analogous to the Gao&ndash;Jafferis&ndash;Wall
+              construction. Below F_*, the channel is silent; above it, correlated evolution begins.
+              That sharp edge is the testable prediction.
+            </p>
+          </div>
+
+          <div
+            className="rounded-xl p-5"
+            style={{
+              background: 'rgba(245,158,11,0.05)',
+              border: '1px solid rgba(245,158,11,0.2)',
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <GitBranch size={14} style={{ color: '#f59e0b' }} />
+              <div
+                className="text-[10px] font-semibold"
+                style={{ color: '#f59e0b', letterSpacing: '0.2em' }}
+              >
+                INTERPRETING RESULTS
+              </div>
+            </div>
+            <div className="text-sm font-semibold mb-2" style={{ color: '#e8eaf0' }}>
+              Both outcomes advance the program.
+            </div>
+            <ul className="text-xs leading-relaxed space-y-2" style={{ color: '#8b92a9' }}>
+              <li>
+                <span style={{ color: '#10b981' }}>Success:</span> non-trivial correlation between
+                Alice&rsquo;s and Bob&rsquo;s local observables &mdash; one that cannot be explained
+                by any pre-established classical record &mdash; detected only above F_*.
+              </li>
+              <li>
+                <span style={{ color: '#f59e0b' }}>Null:</span> the honest expected outcome per
+                &sect;12.2. A null tightens the upper bound on &lambda;_NL and disciplines the
+                research program. Both outcomes are scientifically valuable.
+              </li>
+            </ul>
           </div>
         </div>
 
