@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Check, ExternalLink, GitCommit, BookOpen, ArrowRight } from 'lucide-react';
 
-const CURRENT_VERSION = '1.1';
+const CURRENT_VERSION = '1.2';
 const CURRENT_YEAR = '2026';
 const PAPER_URL = 'https://ansible-quantum.vercel.app/paper';
 const REPO_URL = 'https://github.com/exchekinc/Ansible';
@@ -37,6 +37,21 @@ type Version = {
 };
 
 const versions: Version[] = [
+  {
+    tag: 'v1.2',
+    date: '2026-04-17',
+    title: 'Foundational Consistency Pass',
+    description:
+      'Five new subsections addressing deeper reviewer concerns: higher-order unitarity of H_NL, tighter Bekenstein and GSL derivations, a direct technical reconciliation with the no-signaling theorem, quantum-gravity grounding of the two-tier causality picture, and the long-horizon research program framing.',
+    highlights: [
+      '§2.6 — Hermiticity, ghost-absence, and RG stability of H_NL at higher orders',
+      '§5.5 — Tight Bekenstein channel-capacity derivation and GSL with Ryu-Takayanagi cancellation',
+      '§11.5 — No-signaling rebuttal on its own terms; FLASH-class distinction table',
+      '§11.6 — Two-tier causality in AdS/CFT via ER=EPR and Gao-Jafferis-Wall traversability',
+      '§12.2 — Three-pillar foundational research program: infrastructure, QM/gravity interface, theory',
+    ],
+    accent: '#10b981',
+  },
   {
     tag: 'v1.1',
     date: '2026-04-17',
