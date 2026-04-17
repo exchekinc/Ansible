@@ -2,6 +2,7 @@
 
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 
@@ -61,6 +62,38 @@ const mdComponents = {
       color: '#67e8f9',
     }}>{children}</code>
   ),
+  table: ({ children }: { children?: React.ReactNode }) => (
+    <div style={{ overflowX: 'auto', marginBottom: '1.25rem', marginTop: '1rem' }}>
+      <table style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        fontSize: '0.875rem',
+        color: '#c8ccd8',
+        border: '1px solid rgba(0,212,255,0.15)',
+      }}>{children}</table>
+    </div>
+  ),
+  thead: ({ children }: { children?: React.ReactNode }) => (
+    <thead style={{ background: 'rgba(0,212,255,0.06)' }}>{children}</thead>
+  ),
+  th: ({ children }: { children?: React.ReactNode }) => (
+    <th style={{
+      padding: '0.6rem 0.85rem',
+      textAlign: 'left',
+      fontWeight: 600,
+      color: '#a5b4fc',
+      borderBottom: '1px solid rgba(0,212,255,0.25)',
+      borderRight: '1px solid rgba(0,212,255,0.08)',
+    }}>{children}</th>
+  ),
+  td: ({ children }: { children?: React.ReactNode }) => (
+    <td style={{
+      padding: '0.55rem 0.85rem',
+      borderBottom: '1px solid rgba(0,212,255,0.08)',
+      borderRight: '1px solid rgba(0,212,255,0.05)',
+      verticalAlign: 'top',
+    }}>{children}</td>
+  ),
   blockquote: ({ children }: { children?: React.ReactNode }) => (
     <blockquote style={{
       borderLeft: '3px solid rgba(0,212,255,0.4)',
@@ -99,7 +132,7 @@ export default function PaperContent({ sections }: PaperContentProps) {
           >
             {/* Section content */}
             <ReactMarkdown
-              remarkPlugins={[remarkMath]}
+              remarkPlugins={[remarkMath, remarkGfm]}
               rehypePlugins={[rehypeKatex, rehypeRaw]}
               components={mdComponents as Record<string, React.ComponentType<Record<string, unknown>>>}
             >
@@ -124,7 +157,7 @@ export default function PaperContent({ sections }: PaperContentProps) {
                   </h3>
                 </div>
                 <ReactMarkdown
-                  remarkPlugins={[remarkMath]}
+                  remarkPlugins={[remarkMath, remarkGfm]}
                   rehypePlugins={[rehypeKatex, rehypeRaw]}
                   components={mdComponents as Record<string, React.ComponentType<Record<string, unknown>>>}
                 >
