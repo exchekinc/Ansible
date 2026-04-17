@@ -173,6 +173,19 @@ const sections: Section[] = [
       { number: '12.2', title: 'A Foundational Research Program', id: 'foundational-research-program', isNew: true },
     ],
   },
+  {
+    number: 'A',
+    id: 'appendix-a',
+    title: 'Appendix A: Explicit Lorentz-Covariant Form of H_NL',
+    blurb: 'Weak-field expansion giving a closed leading-order Hamiltonian density handed to any EFT practitioner.',
+    color: '#f59e0b',
+    subsections: [
+      { number: 'A.1', title: 'Starting action and the weak-field expansion', id: 'appendix-a-1', isNew: true },
+      { number: 'A.2', title: 'Choice of the scalar kernel G(x-y)', id: 'appendix-a-2', isNew: true },
+      { number: 'A.3', title: 'Leading-order Hamiltonian density', id: 'appendix-a-3', isNew: true },
+      { number: 'A.4', title: 'Reduction to the main-text Hamiltonian', id: 'appendix-a-4', isNew: true },
+    ],
+  },
 ];
 
 export default function TheoryPage() {

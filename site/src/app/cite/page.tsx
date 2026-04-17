@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Check, ExternalLink, GitCommit, BookOpen, ArrowRight } from 'lucide-react';
 
-const CURRENT_VERSION = '1.2';
+const CURRENT_VERSION = '1.3';
 const CURRENT_YEAR = '2026';
 const PAPER_URL = 'https://ansible-quantum.vercel.app/paper';
 const REPO_URL = 'https://github.com/exchekinc/Ansible';
@@ -37,6 +37,20 @@ type Version = {
 };
 
 const versions: Version[] = [
+  {
+    tag: 'v1.3',
+    date: '2026-04-17',
+    title: 'Covariant Appendix and Geometric Bounds',
+    description:
+      'Closes the remaining structural loopholes: an explicit Lorentz-covariant leading-order form of H_NL as a standalone appendix, and quantitative Casimir and long-baseline interferometer bounds folded into the precision-test landscape.',
+    highlights: [
+      'Appendix A — Weak-field expansion of H_NL with a closed leading-order Hamiltonian density',
+      '§11.4 — Casimir sub-micron force bound: λ_NL · f(F_vac) ≲ 10⁻³²',
+      '§11.4 — LIGO/LISA long-baseline interferometer bound: λ_NL · f(F_arm) ≲ 10⁻³⁰',
+      'Reference list expanded with Lamoreaux, Decca, Bressi, LIGO-O3 squeezed readout, and LISA consortium papers',
+    ],
+    accent: '#f59e0b',
+  },
   {
     tag: 'v1.2',
     date: '2026-04-17',
