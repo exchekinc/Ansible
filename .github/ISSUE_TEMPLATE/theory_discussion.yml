@@ -1,0 +1,78 @@
+name: Theory Discussion
+description: Propose a theoretical modification, raise an objection, or suggest an experimental test
+labels: ["theory"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Theoretical contributions are the heart of this project. Before opening this issue,
+        we ask that you have read the [whitepaper](https://ansible-quantum.vercel.app/paper)
+        and the [CONTRIBUTING guide](../../CONTRIBUTING.md).
+
+        We welcome rigorous objections as much as extensions — a precise critique is a gift.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of theoretical contribution
+      options:
+        - Objection / critique of existing framework
+        - Extension / new derivation
+        - Experimental proposal
+        - Literature connection (missed reference)
+        - Formalism improvement (notation, rigor)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: section
+    attributes:
+      label: Relevant section(s)
+      description: Which section(s) of the whitepaper does this relate to?
+      placeholder: "e.g. §2.2 The Non-Local Coupling Term"
+    validations:
+      required: false
+
+  - type: textarea
+    id: claim
+    attributes:
+      label: Current claim in the framework
+      description: What does the paper currently say (quote or paraphrase)?
+    validations:
+      required: false
+
+  - type: textarea
+    id: argument
+    attributes:
+      label: Your argument or proposal
+      description: |
+        Be as precise as possible. Include equations if relevant
+        (LaTeX is supported in GitHub markdown: $E = mc^2$).
+    validations:
+      required: true
+
+  - type: textarea
+    id: implications
+    attributes:
+      label: Implications
+      description: If correct, what would this change about the theory or its predictions?
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Cite any prior work that supports or contextualizes your argument
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have read the full whitepaper
+        - label: I have checked that this issue hasn't already been raised
+        - label: My argument is internally consistent to the best of my knowledge

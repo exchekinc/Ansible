@@ -1,0 +1,58 @@
+name: Bug Report
+description: Something on the site isn't working correctly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please be as specific as possible.
+
+  - type: input
+    id: page
+    attributes:
+      label: Affected page
+      description: Which page(s) exhibit the issue?
+      placeholder: "e.g. /paper, /simulator, / (homepage)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What did you expect to happen? What actually happened?
+      placeholder: |
+        Expected: The equation in section 2.2 renders correctly
+        Actual: KaTeX throws a parse error and shows raw LaTeX
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Navigate to /paper
+        2. Scroll to section 2.2
+        3. Observe the broken equation
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        Browser: Chrome 124
+        OS: macOS 14.4
+        Screen width: 1440px
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Console errors, screenshots, or anything else relevant
+    validations:
+      required: false

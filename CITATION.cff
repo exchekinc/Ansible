@@ -1,0 +1,63 @@
+cff-version: 1.2.0
+message: "If you use or build upon this work, please cite it as below."
+type: software
+
+title: >-
+  The Ansible Hypothesis: A Theoretical Framework for Quantum Non-Local
+  Information Transfer via Orbital Entanglement Relay Networks
+
+authors:
+  - name: "Dula, M. R."
+    email: matt@mrdula.co
+    affiliation: "ExChek Inc."
+  - name: "Claude 3.7 Sonnet"
+    affiliation: "Anthropic (Claude-assisted discovery)"
+
+version: "1.0.0"
+date-released: "2025-04-17"
+url: "https://ansible-quantum.vercel.app"
+repository-code: "https://github.com/exchekinc/Ansible"
+license: "MIT AND CC-BY-4.0"
+
+abstract: >-
+  A theoretical framework proposing a mechanism for superluminal information
+  transfer via a modified non-local quantum Hamiltonian and a constellation
+  of entangled orbital relay satellites. The Ansible Hypothesis introduces
+  a non-local coupling term λ_NL that permits correlated state evolution
+  while evading (not violating) the no-communication theorem through
+  domain-specific modification of quantum measurement postulates. The
+  framework generates falsifiable experimental predictions and connects to
+  ER=EPR holographic duality and Bekenstein information bounds.
+
+keywords:
+  - quantum entanglement
+  - faster-than-light communication
+  - non-local Hamiltonian
+  - orbital relay network
+  - quantum information theory
+  - ER=EPR
+  - holographic duality
+  - speculative theoretical framework
+  - AI-assisted research
+
+references:
+  - type: article
+    title: "Can quantum-mechanical description of physical reality be considered complete?"
+    authors:
+      - name: "Einstein, A."
+      - name: "Podolsky, B."
+      - name: "Rosen, N."
+    journal: "Physical Review"
+    volume: 47
+    issue: 10
+    year: 1935
+    pages: "777-780"
+  - type: article
+    title: "On the Einstein Podolsky Rosen paradox"
+    authors:
+      - name: "Bell, J. S."
+    journal: "Physics Physique Fizika"
+    volume: 1
+    issue: 3
+    year: 1964
+    pages: "195-200"

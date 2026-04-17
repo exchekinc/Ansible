@@ -1,0 +1,58 @@
+ANSIBLE — DUAL LICENSE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PART I — SOFTWARE LICENSE (MIT)
+
+Applies to all source code, configuration files, and software artifacts in
+this repository (the /site directory and associated tooling).
+
+MIT License
+
+Copyright (c) 2025 M.R. Dula / ExChek Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PART II — WHITEPAPER LICENSE (Creative Commons Attribution 4.0 International)
+
+Applies to the whitepaper content, theoretical framework, mathematical
+formulations, and all text comprising "The Ansible Hypothesis: A Theoretical
+Framework for Quantum Non-Local Information Transfer via Orbital Entanglement
+Relay Networks" (the "Work").
+
+You are free to:
+  Share  — copy and redistribute the Work in any medium or format
+  Adapt  — remix, transform, and build upon the Work for any purpose,
+            even commercially
+
+Under the following terms:
+  Attribution — You must give appropriate credit to the original authors
+                (M.R. Dula, Claude 3.7 Sonnet), provide a link to the
+                license, and indicate if changes were made. You may do so in
+                any reasonable manner, but not in any way that suggests the
+                authors endorse you or your use.
+
+No additional restrictions — You may not apply legal terms or technological
+measures that legally restrict others from doing anything the license permits.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

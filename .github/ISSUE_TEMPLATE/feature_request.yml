@@ -1,0 +1,40 @@
+name: Feature Request
+description: Suggest an improvement to the site, simulator, or documentation
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Site / UI
+        - Simulator
+        - Whitepaper presentation
+        - Documentation
+        - Infrastructure / CI
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What would you like to see?
+      description: Describe the feature clearly. What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation ideas
+      description: Optional — if you have thoughts on how it could be built
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to implement this myself and open a PR

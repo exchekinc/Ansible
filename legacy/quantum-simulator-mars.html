@@ -1,0 +1,516 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Bell, Network, Send, RotateCcw, ChevronDown, ChevronUp, Settings, Zap, Clock } from 'lucide-react';
+
+const QuantumSimulator = () => {
+  // System parameters
+  const [lambda, setLambda] = useState(1.0);
+  const [kappa, setKappa] = useState(0.15);
+  const [theta, setTheta] = useState(Math.PI/8);
+  const [phi, setPhi] = useState(3*Math.PI/8);
+  const [errorRate, setErrorRate] = useState(0.01);
+  const [marsDistance, setMarsDistance] = useState(0); // Will be calculated based on preset
+  const [distancePreset, setDistancePreset] = useState("min");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Mars distance constants in kilometers
+  const MARS_MIN_DISTANCE = 54600000; // Mars at closest approach (~54.6 million km)
+  const MARS_AVG_DISTANCE = 225000000; // Average Earth-Mars distance (~225 million km)
+  const MARS_MAX_DISTANCE = 401000000; // Mars at furthest point (~401 million km)
+  
+  // Simulation state
+  const [message, setMessage] = useState('');
+  const [binaryMessage, setBinaryMessage] = useState([]);
+  const [transmitting, setTransmitting] = useState(false);
+  const [currentBit, setCurrentBit] = useState(null);
+  const [resultBits, setResultBits] = useState([]);
+  const [transmissionComplete, setTransmissionComplete] = useState(false);
+  const [transmissionTime, setTransmissionTime] = useState(0);
+  const [lightspeedTime, setLightspeedTime] = useState(0);
+  const [errorCorrectionEnabled, setErrorCorrectionEnabled] = useState(true);
+  
+  // Animation references
+  const animRef = useRef(null);
+  
+  // Update Mars distance based on preset
+  useEffect(() => {
+    switch(distancePreset) {
+      case "min":
+        setMarsDistance(MARS_MIN_DISTANCE);
+        break;
+      case "avg":
+        setMarsDistance(MARS_AVG_DISTANCE);
+        break;
+      case "max":
+        setMarsDistance(MARS_MAX_DISTANCE);
+        break;
+      default:
+        setMarsDistance(MARS_MIN_DISTANCE);
+    }
+  }, [distancePreset]);
+  
+  // Reset simulation
+  const resetSimulation = () => {
+    setTransmitting(false);
+    setCurrentBit(null);
+    setResultBits([]);
+    setTransmissionComplete(false);
+    setTransmissionTime(0);
+    if (animRef.current) {
+      cancelAnimationFrame(animRef.current);
+      animRef.current = null;
+    }
+  };
+  
+  // Convert message to binary
+  const convertToBinary = () => {
+    if (!message) return;
+    
+    resetSimulation();
+    
+    const binaryArray = [];
+    for (let i = 0; i < message.length; i++) {
+      const charCode = message.charCodeAt(i);
+      const binary = charCode.toString(2).padStart(8, '0');
+      for (let j = 0; j < binary.length; j++) {
+        binaryArray.push(parseInt(binary.charAt(j)));
+      }
+    }
+    
+    setBinaryMessage(binaryArray);
+  };
+  
+  // Start transmission
+  const startTransmission = () => {
+    if (binaryMessage.length === 0) return;
+    
+    resetSimulation();
+    setTransmitting(true);
+    
+    // Calculate light-speed time (distance / c)
+    const c = 299792.458; // speed of light in km/s
+    const lsTime = marsDistance / c; // time in seconds
+    setLightspeedTime(lsTime);
+    
+    // Start transmission animation
+    let bitIndex = 0;
+    let startTime = performance.now();
+    
+    const transmitBit = (timestamp) => {
+      if (bitIndex < binaryMessage.length) {
+        const elapsedTime = (timestamp - startTime) / 1000; // in seconds
+        
+        // Update current bit being transmitted
+        setCurrentBit(binaryMessage[bitIndex]);
+        
+        // Simulate bit transmission
+        if (elapsedTime > 0.1) { // 100ms per bit for faster simulation
+          // Apply error model
+          let receivedBit = binaryMessage[bitIndex];
+          
+          if (Math.random() < errorRate) {
+            receivedBit = 1 - receivedBit; // Flip the bit to simulate error
+          }
+          
+          // Add to results
+          setResultBits(prev => [...prev, receivedBit]);
+          
+          // Move to next bit
+          bitIndex++;
+          startTime = timestamp;
+        }
+        
+        animRef.current = requestAnimationFrame(transmitBit);
+      } else {
+        // Transmission complete
+        setTransmitting(false);
+        setTransmissionComplete(true);
+        
+        // Calculate total transmission time (for simulator purposes, we make it very small)
+        // In theory, FTL quantum communication would have minimal time delay
+        const simulatedTime = 1.5; // fixed base time in seconds
+        setTransmissionTime(simulatedTime);
+      }
+    };
+    
+    animRef.current = requestAnimationFrame(transmitBit);
+  };
+  
+  // Convert binary back to text
+  const getDecodedMessage = () => {
+    if (resultBits.length === 0) return { text: '', errorCount: 0 };
+    
+    let decodedMessage = '';
+    let errorCount = 0;
+    
+    // Apply error correction if enabled
+    let correctedBits = [...resultBits];
+    if (errorCorrectionEnabled) {
+      // Simple error correction: if we know error rate is low, 
+      // we can correct obvious errors by comparing with original
+      for (let i = 0; i < Math.min(correctedBits.length, binaryMessage.length); i++) {
+        if (correctedBits[i] !== binaryMessage[i]) {
+          errorCount++;
+          if (errorCorrectionEnabled) {
+            correctedBits[i] = binaryMessage[i];
+          }
+        }
+      }
+    }
+    
+    // Convert binary back to text
+    for (let i = 0; i < correctedBits.length; i += 8) {
+      if (i + 7 < correctedBits.length) {
+        const byte = correctedBits.slice(i, i + 8).join('');
+        const charCode = parseInt(byte, 2);
+        decodedMessage += String.fromCharCode(charCode);
+      }
+    }
+    
+    return { text: decodedMessage, errorCount };
+  };
+  
+  // Calculate channel capacity based on the parameters
+  const calculateChannelCapacity = () => {
+    // Binary entropy function
+    const h = (p) => {
+      if (p === 0 || p === 1) return 0;
+      return -p * Math.log2(p) - (1 - p) * Math.log2(1 - p);
+    };
+    
+    // Theoretical capacity based on error rate
+    const theoreticalCapacity = 1 - h(errorRate);
+    
+    // Adjust based on entanglement parameters
+    const parameterEfficiency = 0.5 + 0.5 * Math.exp(-(Math.pow(lambda - 1.0, 2) + Math.pow(kappa - 0.15, 2)) / 0.5);
+    
+    // Calculate practical capacity
+    const practicalCapacity = theoreticalCapacity * parameterEfficiency;
+    
+    return {
+      theoretical: theoreticalCapacity,
+      practical: errorCorrectionEnabled ? practicalCapacity : practicalCapacity * 0.7
+    };
+  };
+  
+  // Format time for display
+  const formatTime = (seconds) => {
+    if (seconds < 60) {
+      return `${seconds.toFixed(2)} seconds`;
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes} min, ${remainingSeconds.toFixed(0)} sec`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours} hours, ${minutes} min`;
+    }
+  };
+  
+  // Format distance for display
+  const formatDistance = (km) => {
+    if (km < 1000) {
+      return `${km.toFixed(0)} km`;
+    } else if (km < 1000000) {
+      return `${(km / 1000).toFixed(0)} thousand km`;
+    } else {
+      return `${(km / 1000000).toFixed(1)} million km`;
+    }
+  };
+  
+  // Effect to update binary when message changes
+  useEffect(() => {
+    convertToBinary();
+  }, [message]);
+  
+  // Cleanup animation on unmount
+  useEffect(() => {
+    return () => {
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current);
+      }
+    };
+  }, []);
+  
+  // Calculate channel capacity
+  const capacity = calculateChannelCapacity();
+  
+  // Decoded result
+  const decodedResult = transmissionComplete ? getDecodedMessage() : { text: '', errorCount: 0 };
+  
+  return (
+    <div className="flex flex-col space-y-6 p-4 bg-gray-50 rounded-lg w-full max-w-4xl">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-2">Mars Quantum Communication Simulator</h1>
+        <p className="text-sm text-gray-600">Based on the orbital quantum entanglement network theoretical framework</p>
+      </div>
+      
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center mb-2">
+          <Bell className="text-gray-600 mr-2" size={20} />
+          <h2 className="text-lg font-semibold">Earth-Mars Communication</h2>
+        </div>
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Earth-Mars Distance:</label>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setDistancePreset("min")}
+              className={`flex-1 py-2 px-3 rounded text-sm font-medium ${distancePreset === "min" ? "bg-gray-200 text-gray-800 border border-gray-300" : "bg-gray-100 text-gray-700"}`}
+            >
+              Closest Approach<br/>(54.6 million km)
+            </button>
+            <button 
+              onClick={() => setDistancePreset("avg")}
+              className={`flex-1 py-2 px-3 rounded text-sm font-medium ${distancePreset === "avg" ? "bg-gray-200 text-gray-800 border border-gray-300" : "bg-gray-100 text-gray-700"}`}
+            >
+              Average Distance<br/>(225 million km)
+            </button>
+            <button 
+              onClick={() => setDistancePreset("max")}
+              className={`flex-1 py-2 px-3 rounded text-sm font-medium ${distancePreset === "max" ? "bg-gray-200 text-gray-800 border border-gray-300" : "bg-gray-100 text-gray-700"}`}
+            >
+              Maximum Distance<br/>(401 million km)
+            </button>
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            Standard radio takes {formatTime(lightspeedTime)} to reach Mars at this distance
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">λ (Lambda) Coupling: {lambda.toFixed(2)}</label>
+            <input
+              type="range"
+              min="0"
+              max="2"
+              step="0.05"
+              value={lambda}
+              onChange={(e) => setLambda(parseFloat(e.target.value))}
+              className="w-full"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">κ (Kappa) Coupling: {kappa.toFixed(2)}</label>
+            <input
+              type="range"
+              min="0"
+              max="0.5"
+              step="0.01"
+              value={kappa}
+              onChange={(e) => setKappa(parseFloat(e.target.value))}
+              className="w-full"
+            />
+          </div>
+        </div>
+        
+        <div className="mb-4">
+          <button 
+            className="flex items-center text-sm text-gray-600 hover:text-gray-800"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+          >
+            {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {showAdvanced ? 'Hide Advanced Parameters' : 'Show Advanced Parameters'}
+          </button>
+        </div>
+        
+        {showAdvanced && (
+          <div className="grid grid-cols-2 gap-4 mb-4 bg-gray-50 p-3 rounded">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                θ (Theta): {(theta / Math.PI).toFixed(2)}π
+              </label>
+              <input
+                type="range"
+                min="0"
+                max={Math.PI}
+                step="0.01"
+                value={theta}
+                onChange={(e) => setTheta(parseFloat(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                φ (Phi): {(phi / Math.PI).toFixed(2)}π
+              </label>
+              <input
+                type="range"
+                min="0"
+                max={Math.PI}
+                step="0.01"
+                value={phi}
+                onChange={(e) => setPhi(parseFloat(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Error Rate: {(errorRate * 100).toFixed(1)}%</label>
+              <input
+                type="range"
+                min="0"
+                max="0.1"
+                step="0.001"
+                value={errorRate}
+                onChange={(e) => setErrorRate(parseFloat(e.target.value))}
+                className="w-full"
+              />
+            </div>
+          </div>
+        )}
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="errorCorrection"
+              checked={errorCorrectionEnabled}
+              onChange={() => setErrorCorrectionEnabled(!errorCorrectionEnabled)}
+              className="h-4 w-4 text-gray-600"
+            />
+            <label htmlFor="errorCorrection" className="text-sm text-gray-700">Enable Quantum Error Correction</label>
+          </div>
+          <div className="text-sm text-gray-700">
+            <span className="font-semibold">Channel Capacity:</span> {(capacity.practical * 100).toFixed(2)}%
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center mb-2">
+          <Settings className="text-gray-600 mr-2" size={20} />
+          <h2 className="text-lg font-semibold">Message Input</h2>
+        </div>
+        
+        <div className="flex space-x-2 mb-4">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Enter message to transmit to Mars..."
+            className="flex-1 p-2 border border-gray-300 rounded"
+            rows={3}
+            disabled={transmitting}
+          />
+        </div>
+        
+        <div className="flex justify-between">
+          <button
+            onClick={resetSimulation}
+            className="flex items-center bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+            disabled={transmitting || (!transmissionComplete && binaryMessage.length === 0)}
+          >
+            <RotateCcw size={16} className="mr-1" /> Reset
+          </button>
+          
+          <button
+            onClick={startTransmission}
+            className={`flex items-center px-4 py-2 rounded ${
+              binaryMessage.length > 0 && !transmitting
+                ? 'bg-gray-700 text-white hover:bg-gray-800'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+            disabled={binaryMessage.length === 0 || transmitting}
+          >
+            <Send size={16} className="mr-1" /> Transmit to Mars
+          </button>
+        </div>
+      </div>
+      
+      {binaryMessage.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center mb-4">
+            <Network className="text-gray-600 mr-2" size={20} />
+            <h2 className="text-lg font-semibold">Quantum Transmission</h2>
+          </div>
+          
+          <div className="mb-6 relative h-24 bg-gray-100 rounded-lg overflow-hidden">
+            {/* Transmission visualization */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              {transmitting ? (
+                <div className="flex flex-col items-center">
+                  <div className="text-lg font-semibold">Transmitting bit: {currentBit}</div>
+                  <div className="mt-2 flex space-x-2">
+                    <div className="w-3 h-3 bg-gray-500 rounded-full animate-pulse"></div>
+                    <div className="w-3 h-3 bg-gray-500 rounded-full animate-pulse"></div>
+                    <div className="w-3 h-3 bg-gray-500 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              ) : transmissionComplete ? (
+                <div className="text-lg font-semibold text-green-600">Transmission Complete</div>
+              ) : (
+                <div className="text-lg text-gray-500">Ready to transmit {binaryMessage.length} bits to Mars</div>
+              )}
+            </div>
+            
+            {/* Progress bar */}
+            {(transmitting || transmissionComplete) && (
+              <div 
+                className="absolute bottom-0 left-0 h-2 bg-gray-500" 
+                style={{ 
+                  width: `${(resultBits.length / binaryMessage.length) * 100}%`
+                }}
+              ></div>
+            )}
+          </div>
+          
+          {transmissionComplete && (
+            <div className="bg-gray-50 p-3 rounded-lg mb-4">
+              <div className="grid grid-cols-2 gap-4 mb-2">
+                <div className="flex items-center space-x-2">
+                  <Zap size={16} className="text-yellow-500" />
+                  <span className="text-sm">Quantum Transfer Time:</span>
+                  <span className="font-semibold">{formatTime(transmissionTime)}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Clock size={16} className="text-red-500" />
+                  <span className="text-sm">Radio Transfer Time:</span>
+                  <span className="font-semibold">{formatTime(lightspeedTime)}</span>
+                </div>
+              </div>
+              
+              <div className="mt-2 text-sm text-center">
+                {transmissionTime < lightspeedTime ? (
+                  <span className="text-green-600 font-bold">
+                    {Math.round(lightspeedTime / transmissionTime).toLocaleString()}x faster than light!
+                  </span>
+                ) : (
+                  <span className="text-red-600">
+                    Transmission failed to achieve FTL speeds
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {transmissionComplete && (
+            <div>
+              <h3 className="font-semibold mb-2">Message Received on Mars:</h3>
+              <div className="p-3 bg-gray-50 rounded mb-2 min-h-12">
+                {decodedResult.text || "No message decoded"}
+              </div>
+              <div className="text-sm text-gray-600">
+                {decodedResult.errorCount > 0 ? (
+                  errorCorrectionEnabled ? (
+                    <span>Detected and corrected {decodedResult.errorCount} bit errors in transmission</span>
+                  ) : (
+                    <span>{decodedResult.errorCount} bit errors detected (error correction disabled)</span>
+                  )
+                ) : (
+                  <span>No transmission errors detected</span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      <div className="text-xs text-gray-500 text-center">
+        Disclaimer: This is a simplified simulation based on the theoretical superluminal quantum communication framework described in the paper.
+        Real Mars communication would require a network of quantum relay stations and more complex protocols.
+      </div>
+    </div>
+  );
+};
+
+export default QuantumSimulator;
